@@ -1,5 +1,4 @@
 import axios from 'axios';
-axios.defaults.baseURL=`https://pixabay.com/api/`
 
 async function fetchPixabay(searchQuery, pageNum = 1) {
   try {

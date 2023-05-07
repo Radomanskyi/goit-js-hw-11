@@ -1,5 +1,5 @@
-import { refs } from './partials/refs';
-import { fetchPixabay } from './partials/pixabayAPI';
+import { refs } from './js/refs';
+import { fetchPixabay } from './js/pixabayAPI';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
@@ -48,9 +48,10 @@ async function onClickLoadMore() {
         </p>
     </div>
   </div>`
-  );
+  ).join();
 
-  refs.imageContainer.insertAdjacentHTML('beforeend', marckup.join());
+  refs.imageContainer.insertAdjacentHTML('beforeend', marckup);
+  lightbox.refresh();
 }
 
 async function onUserSearchSub(event) {
@@ -60,12 +61,11 @@ async function onUserSearchSub(event) {
   const userSearchValue = refs.searchForm.children.searchQuery.value.trim();
   const { searchQuery } = event.currentTarget.elements;
 
-  localStorage.setItem('userSearch', userSearchValue);
-
   if (!userSearchValue) {
     return;
   }
   const { hits, totalHits } = await fetchPixabay(searchQuery.value, page);
+  refs.loadMoreBtn.classList.add('hidden');
 
   const marckup = hits.map(
     elem => `
@@ -92,16 +92,27 @@ async function onUserSearchSub(event) {
           </p>   
           </div> 
       </div>`
-  );
+  ).join();
 
-  refs.imageContainer.insertAdjacentHTML('beforeend', marckup.join());
+  refs.imageContainer.insertAdjacentHTML('beforeend', marckup);
   if (totalHits === 0) {
+    refs.loadMoreBtn.classList.add('hidden');
     Notiflix.Notify.failure(
       'Sorry, there are no images matching your search query. Please try again.'
     );
+    refs.searchForm.reset();
+    return;
   } else {
     Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
     refs.loadMoreBtn.classList.toggle('hidden');
+    localStorage.setItem('userSearch', userSearchValue);
   }
+
+  if (totalHits <= 40) {
+    refs.loadMoreBtn.classList.add('hidden');
+  }
+
+  lightbox.refresh();
+
   refs.searchForm.reset();
 }
