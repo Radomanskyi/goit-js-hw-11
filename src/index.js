@@ -23,51 +23,12 @@ async function onClickLoadMore() {
     refs.loadMoreBtn.classList.toggle('hidden');
   }
 
-  const marckup = hits.map(
-    elem => `
-  <div class="photo-card">
-  <a href="${elem.largeImageURL}">
-    <img class="photo-card__image" src="${elem.webformatURL}" alt="${elem.tags}" width="180px" height="180px" loading="lazy" />
-  </a>
-    <div class="info">
-        <p class="info-item">
-            <b>Likes</b>
-            ${elem.likes}
-        </p>
-        <p class="info-item">
-            <b>Views</b>
-            ${elem.views}
-        </p>
-        <p class="info-item">
-            <b>Comments</b>
-            ${elem.comments}
-        </p>
-            <p class="info-item">
-            <b>Downloads</b>
-        ${elem.downloads}
-        </p>
-    </div>
-  </div>`
-  ).join();
-
-  refs.imageContainer.insertAdjacentHTML('beforeend', marckup);
+  renderGalleryMarkup(hits);
   lightbox.refresh();
 }
 
-async function onUserSearchSub(event) {
-  event.preventDefault();
-  refs.imageContainer.innerHTML = '';
-  page = 1;
-  const userSearchValue = refs.searchForm.children.searchQuery.value.trim();
-  const { searchQuery } = event.currentTarget.elements;
-
-  if (!userSearchValue) {
-    return;
-  }
-  const { hits, totalHits } = await fetchPixabay(searchQuery.value, page);
-  refs.loadMoreBtn.classList.add('hidden');
-
-  const marckup = hits.map(
+function renderGalleryMarkup (images) {
+  const marckup = images.map(
     elem => `
     <div class="photo-card">
     <a class="photo-card1" href="${elem.largeImageURL}">
@@ -95,6 +56,23 @@ async function onUserSearchSub(event) {
   ).join();
 
   refs.imageContainer.insertAdjacentHTML('beforeend', marckup);
+}
+
+async function onUserSearchSub(event) {
+  event.preventDefault();
+  refs.imageContainer.innerHTML = '';
+  page = 1;
+  const userSearchValue = refs.searchForm.children.searchQuery.value.trim();
+  const { searchQuery } = event.currentTarget.elements;
+
+  if (!userSearchValue) {
+    return;
+  }
+  const { hits, totalHits } = await fetchPixabay(searchQuery.value, page);
+  refs.loadMoreBtn.classList.add('hidden');
+  renderGalleryMarkup(hits);
+
+  
   if (totalHits === 0) {
     refs.loadMoreBtn.classList.add('hidden');
     Notiflix.Notify.failure(
