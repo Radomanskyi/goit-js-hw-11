@@ -13,6 +13,7 @@ let page = 1;
 
 async function onClickLoadMore() {
   page += 1;
+
   const userSearchValue = localStorage.getItem('userSearch');
   const { hits, totalHits } = await fetchPixabay(userSearchValue, page);
 
@@ -22,7 +23,6 @@ async function onClickLoadMore() {
     );
     refs.loadMoreBtn.classList.toggle('hidden');
   }
-
   renderGalleryMarkup(hits);
   lightbox.refresh();
 }
@@ -54,7 +54,7 @@ function renderGalleryMarkup (images) {
           </div> 
       </div>`
   ).join();
-
+  
   refs.imageContainer.insertAdjacentHTML('beforeend', marckup);
 }
 
@@ -62,17 +62,17 @@ async function onUserSearchSub(event) {
   event.preventDefault();
   refs.imageContainer.innerHTML = '';
   page = 1;
+
   const userSearchValue = refs.searchForm.children.searchQuery.value.trim();
-  const { searchQuery } = event.currentTarget.elements;
 
   if (!userSearchValue) {
+    refs.loadMoreBtn.classList.add('hidden');
     return;
   }
-  const { hits, totalHits } = await fetchPixabay(searchQuery.value, page);
+  const { hits, totalHits } = await fetchPixabay(userSearchValue, page);
   refs.loadMoreBtn.classList.add('hidden');
   renderGalleryMarkup(hits);
 
-  
   if (totalHits === 0) {
     refs.loadMoreBtn.classList.add('hidden');
     Notiflix.Notify.failure(
@@ -85,12 +85,9 @@ async function onUserSearchSub(event) {
     refs.loadMoreBtn.classList.toggle('hidden');
     localStorage.setItem('userSearch', userSearchValue);
   }
-
   if (totalHits <= 40) {
     refs.loadMoreBtn.classList.add('hidden');
   }
-
   lightbox.refresh();
-
   refs.searchForm.reset();
 }
